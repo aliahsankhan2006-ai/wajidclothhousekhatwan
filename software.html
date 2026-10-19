@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wajid Cloth House - Mustakil Software</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f5f1e8;color:#1a1a1a}
+.header{background:#0f3d2e;color:white;padding:15px 20px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px}.header span{color:#d4af37;font-size:12px}
+.btn{background:#0f3d2e;color:white;border:none;padding:10px 18px;border-radius:25px;cursor:pointer;font-weight:bold;font-size:13px}
+.btn-gold{background:#d4af37;color:#0f3d2e}
+.tabs{display:flex;gap:8px;padding:12px;background:white;border-bottom:1px solid #ddd;overflow-x:auto;position:sticky;top:58px;z-index:90}
+.tab-btn{white-space:nowrap;padding:10px 18px;border-radius:20px;border:1px solid #ddd;background:white;cursor:pointer;font-size:13px;font-weight:bold}
+.tab-btn.active{background:#0f3d2e;color:white;border-color:#0f3d2e}
+.tab-content{display:none;padding:15px;max-width:1100px;margin:0 auto}
+.tab-content.active{display:block}
+.card{background:white;border-radius:16px;padding:18px;border:1px solid #e5e5e5;margin-bottom:15px}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(min-width:768px){.grid4{grid-template-columns:repeat(4,1fr)}}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:768px){.grid2{grid-template-columns:1fr 1fr}}
+input,select{width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f6f3eb;padding:10px;text-align:left;font-size:11px}
+td{padding:10px;border-bottom:1px solid #eee}
+.low{color:red;font-weight:bold}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f3d2e;color:white;padding:12px 20px;border-radius:25px;font-size:13px;display:none;z-index:200}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:15px;z-index:300}
+.modal-box{background:white;border-radius:16px;padding:20px;max-width:400px;width:100%}
+</style>
+</head>
+<body>
+
+<div class="header">
+<div><h1>Wajid Cloth House</h1><span>Khatwan Bazaar • Mustakil Software • 0303-4738592</span></div>
+<div style="display:flex;gap:8px"><button class="btn btn-gold" onclick="exportData()">Backup</button><button class="btn" onclick="document.getElementById('importFile').click()">Import</button><input type="file" id="importFile" hidden accept=".json" onchange="importData(event)"></div>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="openTab('dashboard')" id="btn-dashboard">🏠 Dashboard</button>
+<button class="tab-btn" onclick="openTab('stock')" id="btn-stock">📦 Stock</button>
+<button class="tab-btn" onclick="openTab('billing')" id="btn-billing">🧾 Billing</button>
+<button class="tab-btn" onclick="openTab('khata')" id="btn-khata">📒 Khata</button>
+<button class="tab-btn" onclick="openTab('reports')" id="btn-reports">📊 Reports</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab-content active">
+<h2 style="font-size:26px;margin-bottom:5px">As-salamu Alaikum, Wajid Bhai!</h2>
+<p id="todayDate" style="opacity:0.6;font-size:13px"></p>
+<div class="grid4" style="margin-top:15px">
+<div class="card" style="background:#0f3d2e;color:white"><p style="font-size:10px;opacity:0.7">AAJ KI SALE</p><h2 id="dSale" style="font-size:28px;margin-top:8px">Rs. 0</h2><p id="dCount" style="font-size:12px;opacity:0.7;margin-top:5px">0 bills</p></div>
+<div class="card"><p style="font-size:10px;opacity:0.6">TOTAL STOCK</p><h2 id="dStock" style="font-size:22px;margin-top:8px">0 suits</h2><p id="dValue" style="font-size:12px;opacity:0.6">Rs. 0</p></div>
+<div class="card"><p style="font-size:10px;opacity:0.6">UDHAR PENDING</p><h2 id="dUdhar" style="font-size:22px;margin-top:8px;color:#b45309">Rs. 0</h2><p id="dUdharC" style="font-size:12px;opacity:0.6">0 customers</p></div>
+<div class="card" style="background:#fef3c7"><p style="font-size:10px">LOW STOCK</p><h2 id="dLow" style="font-size:22px;margin-top:8px">0</h2><p style="font-size:12px;opacity:0.7">Qty ≤ 3</p></div>
+</div>
+<div class="card"><h3>Low Stock Alert / کم سٹاک</h3><div id="lowList" style="margin-top:10px"></div></div>
+</div>
+
+<!-- STOCK -->
+<div id="tab-stock" class="tab-content">
+<h2>Stock Management</h2>
+<div class="card" style="margin-top:15px">
+<div class="grid2">
+<select id="sBrand"><option>Khaadi</option><option>Bareeze</option><option>Dawood</option><option>Grace</option><option>Al-Karam</option><option>Nishat</option><option>J.</option><option>Gul Ahmed</option><option>Other</option></select>
+<select id="sType"><option>Gents Boski</option><option>Gents Wash & Wear</option><option>Gents Cotton</option><option>Ladies Lawn</option><option>Ladies Khaddar</option><option>Bridal</option><option>Party Wear</option></select>
+<input id="sCode" placeholder="Design Code * e.g. KH-3021">
+<input id="sColor" placeholder="Color e.g. White">
+<input id="sQty" type="number" placeholder="Quantity" value="1">
+<input id="sPur" type="number" placeholder="Purchase Price *">
+<input id="sSale" type="number" placeholder="Sale Price *">
+<button class="btn" onclick="addStock()" id="stockBtn" style="grid-column:1/-1">Add Stock</button>
+</div>
+</div>
+<div style="margin-top:10px;display:flex;gap:10px"><input id="searchStock" placeholder="Search..." oninput="renderStock()" style="flex:1"><button class="btn" onclick="renderStock()">Search</button></div>
+<div class="card" style="margin-top:10px;overflow:auto"><table><thead><tr><th>Brand/Code</th><th>Type</th><th>Qty</th><th>Price</th><th>Action</th></tr></thead><tbody id="stockTable"></tbody></table></div>
+</div>
+
+<!-- BILLING -->
+<div id="tab-billing" class="tab-content">
+<h2>Billing / بل بنائیں</h2>
+<div class="grid2" style="margin-top:15px">
+<div class="card">
+<div class="grid2"><input id="cName" placeholder="Customer Name *"><input id="cPhone" placeholder="Phone 0300..."></div>
+<div style="margin-top:10px;display:flex;gap:8px"><input id="billSearch" placeholder="Search stock..." oninput="renderBillStock()" style="flex:1"><select id="payType"><option value="Cash">Cash</option><option value="Udhar">Udhar</option><option value="EasyPaisa">EasyPaisa</option></select></div>
+<div id="billStockList" style="margin-top:10px;max-height:300px;overflow:auto"></div>
+</div>
+<div class="card">
+<h3>Selected Items</h3>
+<div id="selectedList" style="margin-top:10px"></div>
+<div style="margin-top:15px;border-top:1px solid #ddd;padding-top:10px">
+<div style="display:flex;justify-content:space-between;margin:5px 0"><span>Subtotal</span><span id="bSub">Rs. 0</span></div>
+<div style="display:flex;justify-content:space-between;margin:5px 0"><span>Discount</span><input id="bDisc" type="number" value="0" oninput="calcBill()" style="width:80px"></div>
+<div style="display:flex;justify-content:space-between;font-weight:bold;font-size:18px;margin-top:10px"><span>Total</span><span id="bTotal">Rs. 0</span></div>
+<button class="btn" style="width:100%;margin-top:15px;padding:14px;font-size:16px" onclick="makeBill()">Bill Banao</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- KHATA -->
+<div id="tab-khata" class="tab-content">
+<h2>Khata / Udhar</h2>
+<div class="card" style="margin-top:15px">
+<div style="display:flex;justify-content:space-between"><b>Total Udhar: <span id="khataTotal" style="color:#b45309">Rs. 0</span></b><button class="btn" onclick="exportCSV()">Export CSV</button></div>
+<div id="khataList" style="margin-top:15px"></div>
+</div>
+</div>
+
+<!-- REPORTS -->
+<div id="tab-reports" class="tab-content">
+<h2>Reports</h2>
+<div style="margin-top:15px;display:flex;gap:8px"><button class="tab-btn active" onclick="setReport('today')" id="r-today">Today</button><button class="tab-btn" onclick="setReport('week')" id="r-week">Week</button><button class="tab-btn" onclick="setReport('month')" id="r-month">Month</button><button class="tab-btn" onclick="setReport('all')" id="r-all">All</button></div>
+<div class="grid4" style="margin-top:15px"><div class="card"><p style="font-size:11px">TOTAL SALE</p><h2 id="repSale">Rs. 0</h2></div><div class="card"><p style="font-size:11px">PROFIT</p><h2 id="repProfit" style="color:green">Rs. 0</h2></div><div class="card"><p style="font-size:11px">BILLS</p><h2 id="repCount">0</h2></div></div>
+<div class="card"><div id="reportList"></div></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div id="receiptModal" class="modal" onclick="if(event.target===this)closeReceipt()">
+<div class="modal-box" id="receiptBox"></div>
+</div>
+
+<script>
+let stock = JSON.parse(localStorage.getItem('wajid_final_stock')||'[]');
+let bills = JSON.parse(localStorage.getItem('wajid_final_bills')||'[]');
+let selected = [];
+let editingId = null;
+let reportF = 'month';
+
+if(stock.length===0){
+ stock=[
+  {id:'1',brand:'Khaadi',type:'Ladies Lawn',code:'KH-3021',color:'Red',qty:10,pur:2200,sale:3200},
+  {id:'2',brand:'Dawood',type:'Gents Boski',code:'DB-88',color:'Cream',qty:3,pur:4500,sale:6200},
+  {id:'3',brand:'Grace',type:'Gents Wash & Wear',code:'GR-11',color:'White',qty:15,pur:1800,sale:2500}
+ ];
+ saveStock();
+}
+function saveStock(){localStorage.setItem('wajid_final_stock',JSON.stringify(stock))}
+function saveBills(){localStorage.setItem('wajid_final_bills',JSON.stringify(bills))}
+function toast(m){let t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+
+function openTab(tab){
+ console.log('Opening tab:', tab);
+ document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+ document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
+ let target=document.getElementById('tab-'+tab);
+ let btn=document.getElementById('btn-'+tab);
+ if(target){target.classList.add('active')}
+ if(btn){btn.classList.add('active')}
+ if(tab==='dashboard') renderDash();
+ if(tab==='stock') renderStock();
+ if(tab==='billing') {renderBillStock();renderSelected();}
+ if(tab==='khata') renderKhata();
+ if(tab==='reports') renderReports();
+ window.scrollTo(0,0);
+}
+
+function renderDash(){
+ let today=new Date().toISOString().slice(0,10);
+ let todays=bills.filter(b=>b.date.slice(0,10)===today);
+ let sale=todays.reduce((s,b)=>s+b.final,0);
+ document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-PK',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+ document.getElementById('dSale').textContent='Rs. '+sale.toLocaleString();
+ document.getElementById('dCount').textContent=todays.length+' bills • '+todays.reduce((s,b)=>s+b.items.reduce((a,i)=>a+i.qty,0),0)+' suits';
+ document.getElementById('dStock').textContent=stock.reduce((s,i)=>s+i.qty,0)+' suits';
+ document.getElementById('dValue').textContent='Rs. '+stock.reduce((s,i)=>s+i.pur*i.qty,0).toLocaleString()+' value';
+ let udhar=bills.reduce((s,b)=>s+b.remain,0);
+ document.getElementById('dUdhar').textContent='Rs. '+udhar.toLocaleString();
+ document.getElementById('dUdharC').textContent=bills.filter(b=>b.remain>0).length+' customers';
+ let low=stock.filter(i=>i.qty<=3);
+ document.getElementById('dLow').textContent=low.length;
+ let list=document.getElementById('lowList');
+ list.innerHTML=low.length===0?'<p style="text-align:center;opacity:0.5;padding:20px">Sab theek hai - ماشاءاللہ</p>':low.map(i=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span>${i.brand} ${i.code}</span><span style="color:red;font-weight:bold">${i.qty} left</span></div>`).join('');
+}
+
+function renderStock(){
+ let q=document.getElementById('searchStock').value.toLowerCase();
+ let filtered=stock.filter(s=>(s.brand+' '+s.code+' '+s.type).toLowerCase().includes(q));
+ document.getElementById('stockTable').innerHTML=filtered.map(s=>`
+  <tr><td><b>${s.brand}</b><br><span style="font-size:11px;opacity:0.6">${s.code} • ${s.color}</span></td><td style="font-size:11px">${s.type}</td><td class="${s.qty<=3?'low':''}">${s.qty}</td><td style="font-size:11px">P:${s.pur}<br>S:${s.sale}</td><td><button onclick="editStock('${s.id}')" style="border:1px solid #ccc;padding:4px 8px;border-radius:10px;font-size:11px">Edit</button> <button onclick="delStock('${s.id}')" style="border:1px solid #ccc;padding:4px 8px;border-radius:10px;font-size:11px;color:red">Del</button></td></tr>
+ `).join('');
+}
+
+function addStock(){
+ let brand=document.getElementById('sBrand').value;
+ let type=document.getElementById('sType').value;
+ let code=document.getElementById('sCode').value.toUpperCase().trim();
+ let color=document.getElementById('sColor').value||'White';
+ let qty=parseInt(document.getElementById('sQty').value)||0;
+ let pur=parseInt(document.getElementById('sPur').value)||0;
+ let sale=parseInt(document.getElementById('sSale').value)||0;
+ if(!code||!pur||!sale){toast('Design Code aur Price likho!');return}
+ if(editingId){
+  let idx=stock.findIndex(s=>s.id===editingId);
+  stock[idx]={id:editingId,brand,type,code,color,qty,pur,sale};
+  editingId=null;
+  document.getElementById('stockBtn').textContent='Add Stock';
+  toast('Update ho gaya ✓');
+ }else{
+  stock.unshift({id:Date.now().toString(),brand,type,code,color,qty,pur,sale});
+  toast('Stock add ho gaya ✓');
+ }
+ document.getElementById('sCode').value='';document.getElementById('sQty').value=1;document.getElementById('sPur').value='';document.getElementById('sSale').value='';
+ saveStock();renderStock();renderDash();
+}
+function editStock(id){
+ let s=stock.find(x=>x.id===id);if(!s)return;
+ document.getElementById('sBrand').value=s.brand;document.getElementById('sType').value=s.type;document.getElementById('sCode').value=s.code;document.getElementById('sColor').value=s.color;document.getElementById('sQty').value=s.qty;document.getElementById('sPur').value=s.pur;document.getElementById('sSale').value=s.sale;
+ editingId=id;document.getElementById('stockBtn').textContent='Update Stock';openTab('stock');window.scrollTo(0,0);
+}
+function delStock(id){if(!confirm('Delete?'))return;stock=stock.filter(s=>s.id!==id);saveStock();renderStock();renderDash();toast('Delete ho gaya')}
+
+function renderBillStock(){
+ let q=document.getElementById('billSearch').value.toLowerCase();
+ let filtered=stock.filter(s=>s.qty>0 && (s.brand+' '+s.code+' '+s.color).toLowerCase().includes(q)).slice(0,20);
+ document.getElementById('billStockList').innerHTML=filtered.map(s=>`
+  <div style="border:1px solid #ddd;border-radius:12px;padding:8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div><b style="font-size:13px">${s.brand} ${s.code}</b><br><span style="font-size:11px;opacity:0.6">${s.color} • ${s.qty} left • Rs.${s.sale}</span></div><button class="btn" onclick="addToBill('${s.id}')">Add</button></div>
+ `).join('');
+}
+function addToBill(id){
+ let s=stock.find(x=>x.id===id);if(!s)return;
+ let ex=selected.find(x=>x.id===id);
+ if(ex){if(ex.qty>=s.qty){toast('Stock kam hai!');return}ex.qty++;}else{selected.push({id:s.id,brand:s.brand,code:s.code,qty:1,price:s.sale,pur:s.pur})}
+ renderSelected();
+}
+function renderSelected(){
+ document.getElementById('selectedList').innerHTML=selected.map((it,i)=>`
+  <div style="display:flex;justify-content:space-between;align-items:center;border:1px solid #ddd;border-radius:10px;padding:8px;margin-bottom:6px"><span style="font-size:13px">${it.brand} ${it.code}<br><span style="font-size:11px;opacity:0.6">Rs.${it.price} x ${it.qty}</span></span><span><button onclick="selected[${i}].qty=Math.max(1,selected[${i}].qty-1);renderSelected()" style="border:1px solid #ccc;width:24px;height:24px;border-radius:50%">-</button> <b style="font-size:13px">${it.qty}</b> <button onclick="selected[${i}].qty++;renderSelected()" style="border:1px solid #ccc;width:24px;height:24px;border-radius:50%">+</button> <button onclick="selected.splice(${i},1);renderSelected()" style="color:red;margin-left:8px">x</button></span></div>
+ `).join('');calcBill();
+}
+function calcBill(){
+ let sub=selected.reduce((s,i)=>s+i.price*i.qty,0);
+ let disc=parseInt(document.getElementById('bDisc').value)||0;
+ document.getElementById('bSub').textContent='Rs. '+sub.toLocaleString();
+ document.getElementById('bTotal').textContent='Rs. '+Math.max(0,sub-disc).toLocaleString();
+}
+function makeBill(){
+ let name=document.getElementById('cName').value.trim();
+ let phone=document.getElementById('cPhone').value.trim();
+ if(!name||selected.length===0){toast('Name aur item zaroori hai');return}
+ for(let it of selected){let st=stock.find(s=>s.id===it.id);if(!st||st.qty<it.qty){toast(it.code+' stock kam!');return}}
+ selected.forEach(it=>{let st=stock.find(s=>s.id===it.id);st.qty-=it.qty});
+ let sub=selected.reduce((s,i)=>s+i.price*i.qty,0);
+ let disc=parseInt(document.getElementById('bDisc').value)||0;
+ let final=Math.max(0,sub-disc);
+ let pay=document.getElementById('payType').value;
+ let billNo='WCH-'+Date.now().toString().slice(-6);
+ let newBill={id:Date.now().toString(),billNo,date:new Date().toISOString(),customer:name,phone,items:[...selected],total:sub,discount:disc,final,payType:pay,paid:pay==='Udhar'?0:final,remain:pay==='Udhar'?final:0};
+ bills.unshift(newBill);
+ saveStock();saveBills();
+ selected=[];document.getElementById('cName').value='';document.getElementById('cPhone').value='';document.getElementById('bDisc').value=0;
+ renderSelected();renderBillStock();renderStock();renderDash();
+ showReceipt(newBill);
+ toast('Bill '+billNo+' save ho gaya ✓');
+}
+function showReceipt(b){
+ let box=document.getElementById('receiptBox');
+ box.innerHTML=`<div style="text-align:center;border-bottom:2px solid #0f3d2e;padding-bottom:10px"><div style="width:40px;height:40px;background:#0f3d2e;color:#d4af37;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:10px;font-weight:bold">W</div><h2 style="margin-top:8px">Wajid Cloth House</h2><p style="font-size:11px;opacity:0.6">Khatwan Bazaar • ${b.billNo}</p></div>
+ <div style="font-size:13px;margin-top:10px"><div style="display:flex;justify-content:space-between"><span>Customer:</span><b>${b.customer}</b></div><div style="display:flex;justify-content:space-between"><span>Phone:</span><span>${b.phone||'-'}</span></div><div style="display:flex;justify-content:space-between"><span>Date:</span><span>${new Date(b.date).toLocaleString()}</span></div></div>
+ <div style="border-top:1px dashed #ccc;border-bottom:1px dashed #ccc;margin:10px 0;padding:10px 0;font-size:13px">${b.items.map(i=>`<div style="display:flex;justify-content:space-between"><span>${i.brand} ${i.code} x${i.qty}</span><span>Rs.${i.price*i.qty}</span></div>`).join('')}</div>
+ <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:18px"><span>Total</span><span>Rs. ${b.final.toLocaleString()}</span></div>${b.remain>0?`<div style="display:flex;justify-content:space-between;color:#b45309;font-weight:bold"><span>Udhar</span><span>Rs. ${b.remain}</span></div>`:''}
+ <div style="display:flex;gap:10px;margin-top:15px"><button class="btn" style="flex:1" onclick="closeReceipt()">Band</button><button class="btn" style="flex:1;background:#0f3d2e" onclick="window.print()">Print</button></div>`;
+ document.getElementById('receiptModal').style.display='flex';
+}
+function closeReceipt(){document.getElementById('receiptModal').style.display='none'}
+
+function renderKhata(){
+ let udhar=bills.filter(b=>b.remain>0);
+ document.getElementById('khataTotal').textContent='Rs. '+udhar.reduce((s,b)=>s+b.remain,0).toLocaleString();
+ document.getElementById('khataList').innerHTML=udhar.length===0?'<p style="text-align:center;opacity:0.5;padding:20px">Koi udhar nahi - ماشاءاللہ</p>':udhar.map(b=>`
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eee"><div><b style="font-size:14px">${b.customer}</b><br><span style="font-size:11px;opacity:0.6">${b.billNo} • ${b.phone} • ${new Date(b.date).toLocaleDateString()}</span></div><div style="text-align:right"><b style="color:#b45309">Rs. ${b.remain}</b><br><div style="margin-top:5px"><a href="tel:${b.phone}" style="font-size:10px;border:1px solid #ccc;padding:4px 8px;border-radius:15px;text-decoration:none;color:black">Call</a> <button onclick="payUdhar('${b.id}')" style="font-size:10px;background:#0f3d2e;color:white;padding:4px 10px;border-radius:15px;border:none">Paid</button></div></div></div>
+ `).join('');
+}
+function payUdhar(id){
+ let amt=parseInt(prompt('Kitna jama hua? Rs.'))||0;if(!amt)return;
+ let b=bills.find(x=>x.id===id);if(!b)return;
+ b.paid+=amt;b.remain=Math.max(0,b.final-b.paid);saveBills();renderKhata();renderDash();toast('Rs.'+amt+' jama ✓');
+}
+function setReport(f){
+ reportF=f;
+ document.querySelectorAll('[id^="r-"]').forEach(e=>e.classList.remove('active'));
+ document.getElementById('r-'+f).classList.add('active');
+ renderReports();
+}
+function renderReports(){
+ let filtered=bills;
+ let now=new Date();
+ if(reportF==='today'){filtered=bills.filter(b=>b.date.slice(0,10)===now.toISOString().slice(0,10))}
+ else if(reportF==='week'){let weekAgo=new Date(now-7*86400000);filtered=bills.filter(b=>new Date(b.date)>=weekAgo)}
+ else if(reportF==='month'){let m=now.toISOString().slice(0,7);filtered=bills.filter(b=>b.date.slice(0,7)===m)}
+ let sale=filtered.reduce((s,b)=>s+b.final,0);
+ let profit=filtered.reduce((s,b)=>s+b.items.reduce((a,i)=>a+(i.price-i.pur)*i.qty,0)-b.discount,0);
+ document.getElementById('repSale').textContent='Rs. '+sale.toLocaleString();
+ document.getElementById('repProfit').textContent='Rs. '+profit.toLocaleString();
+ document.getElementById('repCount').textContent=filtered.length;
+ document.getElementById('reportList').innerHTML=filtered.map(b=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:13px"><span>${b.billNo} - ${b.customer}</span><span>Rs.${b.final} ${b.remain>0?'(Udhar)':''}</span></div>`).join('')||'<p style="text-align:center;opacity:0.5;padding:20px">No bills</p>';
+}
+function exportData(){
+ let data={stock,bills,shop:'Wajid Cloth House',exportedAt:new Date().toISOString()};
+ let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='wajid_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Backup exported ✓');
+}
+function importData(e){
+ let file=e.target.files[0];if(!file)return;
+ let r=new FileReader();
+ r.onload=()=>{try{let data=JSON.parse(r.result);if(data.stock)stock=data.stock;if(data.bills)bills=data.bills;saveStock();saveBills();renderDash();renderStock();toast('Import ho gaya ✓')}catch{toast('Invalid file')}};
+ r.readAsText(file);
+}
+function exportCSV(){
+ let rows=[['BillNo','Date','Customer','Phone','Total','Final','Payment','Remaining']];
+ bills.forEach(b=>rows.push([b.billNo,b.date.slice(0,10),b.customer,b.phone,b.total,b.final,b.payType,b.remain]));
+ let csv=rows.map(r=>r.join(',')).join('\n');
+ let blob=new Blob([csv],{type:'text/csv'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='wajid_report.csv';a.click();
+}
+
+renderDash();
+renderStock();
+</script>
+</body>
+</html>
