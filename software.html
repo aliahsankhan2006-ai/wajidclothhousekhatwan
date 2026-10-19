@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wajid Cloth House - Mustakil Software</title>
+<title>Wajid Cloth House - Mustakil Software - Secure</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{background:#f5f1e8;color:#1a1a1a}
@@ -26,16 +26,54 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:#f6f3eb;padding:10px;text-align:left;font-size:11px}
 td{padding:10px;border-bottom:1px solid #eee}
 .low{color:red;font-weight:bold}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f3d2e;color:white;padding:12px 20px;border-radius:25px;font-size:13px;display:none;z-index:200}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f3d2e;color:white;padding:12px 20px;border-radius:25px;font-size:13px;display:none;z-index:500}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:15px;z-index:300}
 .modal-box{background:white;border-radius:16px;padding:20px;max-width:400px;width:100%}
+/* LOGIN SCREEN - MUSTAKIL SECURITY */
+#loginScreen{position:fixed;inset:0;z-index:1000;background:linear-gradient(135deg,#0f3d2e 0%,#1a5c46 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:white;border-radius:24px;padding:30px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center}
+.login-logo{width:60px;height:60px;background:#0f3d2e;color:#d4af37;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto 15px}
+.login-box h2{font-size:22px;margin-bottom:5px;color:#0f3d2e}
+.login-box p{font-size:12px;opacity:0.6;margin-bottom:20px}
+.login-input{margin-bottom:12px;text-align:left}
+.login-input label{font-size:12px;font-weight:bold;display:block;margin-bottom:5px;color:#0f3d2e}
+.login-input input{padding:14px;font-size:14px;border:2px solid #e5e7eb}
+.login-input input:focus{border-color:#0f3d2e;outline:none}
+.login-btn{width:100%;padding:14px;background:#0f3d2e;color:white;border:none;border-radius:12px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:10px}
+.login-btn:hover{background:#1a5c46}
+.login-error{color:red;font-size:12px;margin-top:10px;display:none}
+.login-footer{margin-top:20px;font-size:11px;opacity:0.5}
 </style>
 </head>
 <body>
 
+<!-- SECURE LOGIN -->
+<div id="loginScreen">
+<div class="login-box">
+<div class="login-logo">W</div>
+<h2>Wajid Cloth House</h2>
+<p>Khatwan Bazaar • Mustakil Secure Login</p>
+<div class="login-input">
+<label>Admin ID / ایڈمن آئی ڈی</label>
+<input id="loginId" type="text" placeholder="admin">
+</div>
+<div class="login-input">
+<label>Password / پاس ورڈ</label>
+<input id="loginPass" type="password" placeholder="Khatwan786">
+</div>
+<button class="login-btn" onclick="doLogin()">Login / لاگ ان</button>
+<p id="loginError" class="login-error">❌ ID ya Password galat hai!</p>
+<div class="login-footer">
+<p>🔒 Mustakil Secure Software • Offline</p>
+<p style="margin-top:5px">Admin ID: <b>admin</b> • Password: <b>Khatwan786</b></p>
+<p style="margin-top:8px;font-size:10px">0303-4738592 • 0302-7699436</p>
+</div>
+</div>
+</div>
+
 <div class="header">
-<div><h1>Wajid Cloth House</h1><span>Khatwan Bazaar • Mustakil Software • 0303-4738592</span></div>
-<div style="display:flex;gap:8px"><button class="btn btn-gold" onclick="exportData()">Backup</button><button class="btn" onclick="document.getElementById('importFile').click()">Import</button><input type="file" id="importFile" hidden accept=".json" onchange="importData(event)"></div>
+<div><h1>Wajid Cloth House</h1><span>Khatwan Bazaar • Mustakil Software • Secure</span></div>
+<div style="display:flex;gap:8px"><button class="btn btn-gold" onclick="exportData()">Backup</button><button class="btn" onclick="document.getElementById('importFile').click()">Import</button><button class="btn" onclick="logout()" style="background:#7f1d1d">Logout</button><input type="file" id="importFile" hidden accept=".json" onchange="importData(event)"></div>
 </div>
 
 <div class="tabs">
@@ -124,6 +162,50 @@ td{padding:10px;border-bottom:1px solid #eee}
 </div>
 
 <script>
+// ===== SECURE LOGIN - MUSTAKIL =====
+const ADMIN_ID = "admin";
+const ADMIN_PASS = "Khatwan786";
+const ALT_ID = "Khatwan786"; // also allow Khatwan786 as ID
+
+function checkLogin(){
+ let logged = localStorage.getItem('wajid_logged_in');
+ if(logged === 'true'){
+   document.getElementById('loginScreen').style.display='none';
+   return true;
+ }
+ return false;
+}
+
+function doLogin(){
+ let id = document.getElementById('loginId').value.trim();
+ let pass = document.getElementById('loginPass').value.trim();
+ let error = document.getElementById('loginError');
+ // Allow admin/Khatwan786 or Khatwan786/Khatwan786
+ if((id.toLowerCase()===ADMIN_ID && pass===ADMIN_PASS) || (id===ALT_ID && pass===ADMIN_PASS) || (id.toLowerCase()===ADMIN_ID.toLowerCase() && pass===ADMIN_PASS)){
+   localStorage.setItem('wajid_logged_in','true');
+   document.getElementById('loginScreen').style.display='none';
+   toast('Login successful! Welcome Wajid Bhai ✓');
+   renderDash();
+ } else {
+   error.style.display='block';
+   toast('❌ ID ya Password galat!');
+ }
+}
+
+function logout(){
+ if(confirm('Logout karna hai?')){
+   localStorage.removeItem('wajid_logged_in');
+   document.getElementById('loginScreen').style.display='flex';
+   document.getElementById('loginId').value='';
+   document.getElementById('loginPass').value='';
+ }
+}
+
+// Allow Enter key
+document.getElementById('loginPass').addEventListener('keypress', function(e){ if(e.key==='Enter') doLogin(); });
+document.getElementById('loginId').addEventListener('keypress', function(e){ if(e.key==='Enter') document.getElementById('loginPass').focus(); });
+
+// ===== ORIGINAL SOFTWARE CODE =====
 let stock = JSON.parse(localStorage.getItem('wajid_final_stock')||'[]');
 let bills = JSON.parse(localStorage.getItem('wajid_final_bills')||'[]');
 let selected = [];
@@ -143,7 +225,6 @@ function saveBills(){localStorage.setItem('wajid_final_bills',JSON.stringify(bil
 function toast(m){let t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
 
 function openTab(tab){
- console.log('Opening tab:', tab);
  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
  document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
  let target=document.getElementById('tab-'+tab);
@@ -316,8 +397,13 @@ function exportCSV(){
  let blob=new Blob([csv],{type:'text/csv'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='wajid_report.csv';a.click();
 }
 
-renderDash();
-renderStock();
+// Init
+if(!checkLogin()){
+ // show login
+} else {
+ renderDash();
+ renderStock();
+}
 </script>
 </body>
 </html>
